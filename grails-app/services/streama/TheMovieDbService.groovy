@@ -173,7 +173,14 @@ class TheMovieDbService {
       url = new URL(requestUrl)
       def JsonContent = url.getText("UTF-8")
       data = new JsonSlurper().parseText(JsonContent)
-
+      if(data.results?.size() > 1 && year) {
+        if(type == 'movie') {
+          data.results = data.results.findAll{it.release_date?.take(4) == year}
+        }
+        else {
+          data.results = data.results.findAll{it.first_air_date?.take(4) == year}
+        }
+      }
       apiCacheData["$type:$name"] = data
     }
     catch(e) {
