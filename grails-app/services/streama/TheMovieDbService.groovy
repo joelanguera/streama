@@ -163,6 +163,9 @@ class TheMovieDbService {
 
 
     def requestUrl = BASE_URL + '/search/' + type + '?query=' + query + '&api_key=' + API_KEY
+    if (year) {
+      requestUrl += (type == 'movie' ? '&year=' : '&first_air_date_year=') + year.toString();
+    }
     def data
     URL url
 
@@ -170,9 +173,7 @@ class TheMovieDbService {
       url = new URL(requestUrl)
       def JsonContent = url.getText("UTF-8")
       data = new JsonSlurper().parseText(JsonContent)
-      if(data.results?.size() > 1 && year){
-        data.results = data.results.findAll{it.release_date.take(4) == year}
-      }
+
       apiCacheData["$type:$name"] = data
     }
     catch(e) {

@@ -60,7 +60,7 @@ class BulkCreateService {
       def tvShowMatcher = fileName =~ '(?i)' + tvShowRegex
 
       if (tvShowMatcher.matches()) {
-        matchTvShowFromFile(tvShowMatcher, fileResult)
+        matchTvShowFromFile(tvShowMatcher, fileResult, tvShowRegex)
         return true
       }
     }
@@ -71,14 +71,14 @@ class BulkCreateService {
 
 	foundMatch = movieRegexList.any { movieRegex ->
 		def movieMatcher = fileName =~ '(?i)' + movieRegex
-		
+
 		if (movieMatcher.matches()) {
 			matchMovieFromFile(movieMatcher, fileResult, movieRegex)
 			return true
 			return fileResult
 		}
 	}
-	
+
 	if (foundMatch) {
 		return fileResult
 	}
@@ -140,8 +140,9 @@ class BulkCreateService {
   }
 
 
-  private void matchTvShowFromFile(Matcher tvShowMatcher, LinkedHashMap<String, Object> fileResult) {
+  private void matchTvShowFromFile(Matcher tvShowMatcher, LinkedHashMap<String, Object> fileResult, tvShowRegex) {
     def name = tvShowMatcher.group('Name').replaceAll(/[._]/, " ")
+    def year = tvShowRegex.contains('<Year>') ? tvShowMatcher.group('Year') : null
     def seasonNumber = tvShowMatcher.group('Season').toInteger()
     def episodeNumber = tvShowMatcher.group('Episode').toInteger()
     def type = "tv"
@@ -152,7 +153,7 @@ class BulkCreateService {
       def tvShowData
       def tvShowId
 
-      def json = theMovieDbService.searchForEntry(type, name)
+      def json = theMovieDbService.searchForEntry(type, name, year)
       tvShowData = json?.results[0]
       tvShowId = tvShowData.id
       existingTvShow = TvShow.findByApiIdAndDeletedNotEqual(tvShowId, true)
