@@ -220,8 +220,9 @@ class TheMovieDbService {
 
 
   def createEntityFromApiData(type, Map data){
-    def apiId = data.id
-    data.remove('id')
+    def dataClone = data.clone()
+    def apiId = dataClone.id
+    dataClone.remove('id')
     def entity
 
     if(type == 'movie'){
@@ -232,17 +233,17 @@ class TheMovieDbService {
     }
     if(type == 'episode'){
       entity = new Episode()
-      TvShow tvShow = TvShow.findByApiIdAndDeletedNotEqual(data.tv_id, true)
+      TvShow tvShow = TvShow.findByApiIdAndDeletedNotEqual(dataClone.tv_id, true)
       if(!tvShow){
-        tvShow = createEntityFromApiId('tv', data.tv_id)
+        tvShow = createEntityFromApiId('tv', dataClone.tv_id)
       }
       entity.show = tvShow
 //      log.debug("epiosde data")
     }
 
-    entity.properties = data
-    if(data.genres){
-      entity.genre = parseGenres(data.genres*.id)
+    entity.properties = dataClone
+    if(dataClone.genres){
+      entity.genre = parseGenres(dataClone.genres*.id)
     }
     if(type == 'movie'){
       entity.trailerKey = getTrailerForMovie(apiId)?.key
