@@ -1,5 +1,6 @@
 package streama
 
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import grails.transaction.Transactional
 import org.hibernate.boot.archive.internal.UrlInputStreamAccess
@@ -220,7 +221,7 @@ class TheMovieDbService {
 
 
   def createEntityFromApiData(type, Map data){
-    def dataClone = data.clone()
+    def dataClone = new JsonSlurper().parseText(JsonOutput.toJson(data))
     def apiId = dataClone.id
     dataClone.remove('id')
     def entity
